@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dia · Chat Web</title>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#7c3aed',
+              soft: '#a855f7',
+              deep: '#581c87'
+            }
+          },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(124,58,237,0.25), 0 20px 70px rgba(0,0,0,0.35)'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#7c3aed,#a855f7); border-radius: 9999px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <div class="pointer-events-none fixed inset-0 opacity-60 blur-3xl">
+    <div class="absolute -left-20 top-16 h-64 w-64 rounded-full bg-brand/20"></div>
+    <div class="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-emerald-500/10"></div>
+  </div>
+
+  <div class="relative mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 lg:px-8">
+    <header class="flex flex-col gap-4 rounded-2xl bg-slate-900/70 p-6 backdrop-blur shadow-glow ring-1 ring-white/5 md:flex-row md:items-center md:justify-between">
+      <div class="space-y-2">
+        <div class="inline-flex items-center gap-2 rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand-soft ring-1 ring-brand/30">
+          <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+          Live preview · tema escuro
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight text-white md:text-4xl">Chat Web com Tailwind CSS</h1>
+        <p class="max-w-3xl text-sm text-slate-300">
+          Um layout de chat minimalista que pode ser plugado em um endpoint real do Dia. Inclui quick prompts, indicador de digitação,
+          e bolhas diferenciadas para usuário e assistente, tudo em um tema escuro com gradientes sutis.
+        </p>
+        <div class="flex flex-wrap gap-2 text-xs text-slate-300">
+          <span class="rounded-full bg-white/5 px-3 py-1 ring-1 ring-white/10">Tailwind CDN</span>
+          <span class="rounded-full bg-white/5 px-3 py-1 ring-1 ring-white/10">Sem dependências extras</span>
+          <span class="rounded-full bg-white/5 px-3 py-1 ring-1 ring-white/10">Preparado para IA</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button id="clearButton" class="group flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/10 transition hover:bg-white/10">
+          <span class="rounded-md bg-brand/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-soft">Clear</span>
+          Reiniciar conversa
+        </button>
+        <a href="https://github.com/nari-labs/dia" target="_blank" class="flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition hover:bg-brand-soft">
+          Ver repositório
+        </a>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 gap-4 md:grid-cols-[1.6fr_1fr]">
+      <section class="flex flex-col rounded-2xl bg-slate-900/70 p-4 shadow-glow ring-1 ring-white/5 md:p-6">
+        <div class="mb-4 flex items-center justify-between text-sm text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            <span id="statusLabel">Dia pronto para responder</span>
+          </div>
+          <span id="tokenHint" class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10">Nenhum backend conectado</span>
+        </div>
+
+        <div id="chatLog" class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-slate-950/40 p-3 ring-1 ring-white/5" aria-live="polite" aria-label="Histórico do chat">
+        </div>
+
+        <div class="mt-4 space-y-3 rounded-xl bg-slate-950/60 p-4 ring-1 ring-white/5">
+          <div class="flex flex-wrap gap-2" id="quickPrompts" aria-label="Sugestões rápidas">
+            <button data-prompt="Gere uma saudação empolgante em dois locutores." class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 transition hover:bg-white/10">Saudação empolgante</button>
+            <button data-prompt="Simule um bate-papo curto sobre novidades de IA." class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 transition hover:bg-white/10">Atualizações de IA</button>
+            <button data-prompt="Dê dicas para melhorar um roteiro de podcast." class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 transition hover:bg-white/10">Roteiro de podcast</button>
+            <button data-prompt="Sugira um tom mais dramático para uma narração." class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 transition hover:bg-white/10">Tom dramático</button>
+          </div>
+
+          <div class="flex flex-col gap-3 rounded-xl border border-white/5 bg-slate-900/70 p-3">
+            <label for="messageInput" class="text-sm font-medium text-slate-200">Mensagem</label>
+            <textarea id="messageInput" rows="3" placeholder="Digite sua mensagem e pressione Enviar ou Shift+Enter para quebrar linha" class="w-full resize-none rounded-lg border border-white/10 bg-slate-950/70 px-4 py-3 text-slate-100 shadow-inner shadow-black/30 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/60"></textarea>
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
+                <span id="typingIndicator" class="hidden">Dia está digitando...</span>
+              </div>
+              <span class="rounded-full bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 ring-1 ring-white/10">Enter para enviar · Shift+Enter nova linha</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <button id="sendButton" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition hover:bg-brand-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                <span class="text-lg">➤</span>
+                Enviar
+              </button>
+              <button id="mockReplyToggle" class="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-brand hover:text-brand-soft">Responder automaticamente</button>
+              <span class="text-xs text-slate-400">Conecte sua API para respostas reais do modelo.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="space-y-4">
+        <div class="rounded-2xl bg-slate-900/70 p-5 shadow-glow ring-1 ring-white/5">
+          <h2 class="mb-3 text-lg font-semibold text-white">O que muda?</h2>
+          <ul class="space-y-2 text-sm text-slate-300">
+            <li class="flex gap-2">
+              <span class="mt-1 h-2 w-2 rounded-full bg-brand-soft"></span>
+              Tema escuro com camadas de vidro e gradientes sutis.
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-1 h-2 w-2 rounded-full bg-brand-soft"></span>
+              Layout pronto para acoplar a um endpoint de geração.
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-1 h-2 w-2 rounded-full bg-brand-soft"></span>
+              Quick prompts que preenchem o campo automaticamente.
+            </li>
+          </ul>
+        </div>
+        <div class="rounded-2xl bg-slate-900/70 p-5 shadow-glow ring-1 ring-white/5">
+          <h2 class="mb-3 text-lg font-semibold text-white">Como conectar ao backend?</h2>
+          <ol class="list-decimal space-y-2 pl-5 text-sm text-slate-300">
+            <li>Substitua a função <code class="rounded bg-white/5 px-1 text-[11px] text-slate-100">mockReply</code> por uma chamada HTTP.</li>
+            <li>Envie <code class="rounded bg-white/5 px-1 text-[11px] text-slate-100">messages</code> como histórico no corpo da requisição.</li>
+            <li>Atualize <code class="rounded bg-white/5 px-1 text-[11px] text-slate-100">statusLabel</code> para refletir o estado da API.</li>
+          </ol>
+          <p class="mt-3 text-xs text-slate-400">Não há dependências extras além do Tailwind via CDN.</p>
+        </div>
+        <div class="rounded-2xl bg-gradient-to-br from-brand/20 via-slate-900 to-slate-900 p-5 shadow-glow ring-1 ring-brand/30">
+          <h2 class="mb-2 text-lg font-semibold text-white">Dica</h2>
+          <p class="text-sm text-slate-200">Use este layout como front-end para o app Gradio existente ou para um endpoint FastAPI customizado. A seção inferior já traz dicas de UX para gravação.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const chatLog = document.getElementById('chatLog');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const statusLabel = document.getElementById('statusLabel');
+    const tokenHint = document.getElementById('tokenHint');
+    const clearButton = document.getElementById('clearButton');
+    const quickPrompts = Array.from(document.querySelectorAll('[data-prompt]'));
+    const mockReplyToggle = document.getElementById('mockReplyToggle');
+
+    let autoReplyEnabled = true;
+
+    const messages = [
+      { role: 'assistant', content: 'Olá! Sou a Dia, pronta para transformar roteiros em diálogos realistas. Envie um texto curto e veja como poderia soar.' },
+      { role: 'user', content: 'Quero um diálogo curto de boas-vindas para um podcast de tecnologia.' },
+      { role: 'assistant', content: 'Claro! [S1] Bem-vindos a mais um episódio. [S2] Hoje vamos falar sobre modelos abertos e áudio generativo. [S1] Fique por aqui que temos surpresas.' }
+    ];
+
+    function messageTemplate(message) {
+      const isAssistant = message.role === 'assistant';
+      const bubble = document.createElement('div');
+      bubble.className = `group flex gap-3 ${isAssistant ? 'justify-start' : 'justify-end'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 text-xs font-semibold text-white';
+      avatar.textContent = isAssistant ? 'Dia' : 'Você';
+
+      const body = document.createElement('div');
+      body.className = `max-w-xl rounded-2xl px-4 py-3 text-sm leading-relaxed shadow ${isAssistant ? 'bg-gradient-to-br from-brand/20 via-slate-900 to-slate-900 ring-1 ring-brand/30' : 'bg-white/10 ring-1 ring-white/10'}`;
+      body.textContent = message.content;
+
+      if (isAssistant) {
+        bubble.appendChild(avatar);
+        bubble.appendChild(body);
+      } else {
+        bubble.appendChild(body);
+        bubble.appendChild(avatar);
+      }
+
+      return bubble;
+    }
+
+    function renderMessages() {
+      chatLog.innerHTML = '';
+      messages.forEach((message) => {
+        chatLog.appendChild(messageTemplate(message));
+      });
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function mockReply(userText) {
+      const templates = [
+        'Entendi! Posso narrar isso em dois locutores e com pausas naturais.',
+        'Boa ideia. Para manter clareza, inclua as tags [S1] e [S2] onde quiser troca de voz.',
+        'Já imagino o som: começo calmo, depois crescendo para o momento principal.',
+        'Posso sugerir uma versão mais curta ou mais energética, se preferir.',
+        'Tudo pronto. Basta enviar o script com as indicações de tom que você deseja.'
+      ];
+      const choice = templates[Math.floor(Math.random() * templates.length)];
+      return `${choice}\n\nTrecho enviado: ${userText.slice(0, 120)}${userText.length > 120 ? '...' : ''}`;
+    }
+
+    function setTyping(state) {
+      typingIndicator.classList.toggle('hidden', !state);
+      sendButton.disabled = state;
+      sendButton.classList.toggle('opacity-60', state);
+    }
+
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      messages.push({ role: 'user', content: text });
+      messageInput.value = '';
+      renderMessages();
+
+      if (!autoReplyEnabled) {
+        tokenHint.textContent = 'Auto-reply desativado · Conecte seu backend';
+        return;
+      }
+
+      setTyping(true);
+      statusLabel.textContent = 'Dia pensando...';
+
+      setTimeout(() => {
+        messages.push({ role: 'assistant', content: mockReply(text) });
+        renderMessages();
+        setTyping(false);
+        statusLabel.textContent = 'Dia pronto para responder';
+        tokenHint.textContent = 'Mock local · Substitua por sua API';
+      }, 650 + Math.random() * 700);
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    clearButton.addEventListener('click', () => {
+      messages.splice(0, messages.length);
+      messages.push({ role: 'assistant', content: 'Conversa reiniciada. Envie uma mensagem para começar.' });
+      renderMessages();
+    });
+
+    quickPrompts.forEach((button) => {
+      button.addEventListener('click', () => {
+        messageInput.value = button.dataset.prompt;
+        messageInput.focus();
+      });
+    });
+
+    mockReplyToggle.addEventListener('click', () => {
+      autoReplyEnabled = !autoReplyEnabled;
+      mockReplyToggle.textContent = autoReplyEnabled ? 'Responder automaticamente' : 'Resposta manual';
+      mockReplyToggle.classList.toggle('border-brand');
+      mockReplyToggle.classList.toggle('text-brand-soft');
+    });
+
+    renderMessages();
+  </script>
+</body>
+</html>

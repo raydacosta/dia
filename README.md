@@ -69,6 +69,14 @@ python app.py
 Note that the model was not fine-tuned on a specific voice. Hence, you will get different voices every time you run the model.
 You can keep speaker consistency by either adding an audio prompt (a guide coming VERY soon - try it with the second example on Gradio for now), or fixing the seed.
 
+### Dark Tailwind chat web (static)
+
+We also provide a lightweight chat front-end using Tailwind CSS in **`dia/static/chatweb.html`**.
+
+- Open the file directly in your browser for a dark, glassy chat layout with quick prompts and typing indicators.
+- The page ships with a local mock responder; to connect to a real backend, replace the `mockReply` call in the inline script with your API request and update the status label accordingly.
+- No build step is required thanks to the Tailwind CDN.
+
 ## Features
 
 - Generate dialogue via `[S1]` and `[S2]` tag
